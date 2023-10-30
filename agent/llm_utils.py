@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dashscope import Generation
+
 import json
 
 from fastapi import WebSocket
@@ -62,13 +64,20 @@ def send_chat_completion_request(
     messages, model, temperature, max_tokens, stream, websocket
 ):
     if not stream:
-        result = lc_openai.ChatCompletion.create(
-            model=model, # Change model here to use different models
-            messages=messages,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            provider=CFG.llm_provider, # Change provider here to use a different API
-        )
+        if model.startswith('llama2'): #TODO
+            response = Generation.call(  
+                model=model,
+                prompt=str(messages)
+            )
+            return response.output.text
+        else:
+            result = lc_openai.ChatCompletion.create(
+                model=model, # Change model here to use different models
+                messages=messages, # 检查一下这个messages是什么格式
+                temperature=temperature,
+                max_tokens=max_tokens,
+                provider=CFG.llm_provider, # Change provider here to use a different API
+            )
         return result["choices"][0]["message"]["content"]
     else:
         return stream_response(model, messages, temperature, max_tokens, websocket)

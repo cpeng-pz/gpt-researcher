@@ -8,6 +8,9 @@ import os
 from agent.llm_utils import choose_agent
 from agent.run import WebSocketManager
 
+import dashscope
+dashscope.api_key = 'sk-7076cf3ff0b046e9b51b7ac47b9a6df4'
+
 
 class ResearchRequest(BaseModel):
     task: str
@@ -49,7 +52,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 agent = json_data.get("agent")
                 # temporary so "normal agents" can still be used and not just auto generated, will be removed when we move to auto generated
                 if agent == "Auto Agent":
-                    agent_dict = choose_agent(task)
+                    agent_dict = choose_agent(task) # 在这里根据task，用gpt-4（默认）生成最合适的agent类型和对应的role prompt
                     agent = agent_dict.get("agent")
                     agent_role_prompt = agent_dict.get("agent_role_prompt")
                 else:
